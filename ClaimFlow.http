@@ -1,0 +1,6 @@
+@ClaimFlow_HostAddress = http://localhost:5124
+
+GET {{ClaimFlow_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
