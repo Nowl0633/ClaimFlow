@@ -4,6 +4,6 @@ namespace ClaimFlow.Services;
 
 public interface RegistrationServiceInterface
 {
-    Task<RegisterCustomerResponse> Register(RegisterCustomerRequest request);
     Task<bool> EmailExists(string email);
+    Task<RegisterCustomerResponse> Register(RegisterCustomerRequest request);
 }

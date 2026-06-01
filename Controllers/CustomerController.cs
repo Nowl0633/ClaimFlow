@@ -5,12 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace ClaimFlow.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/customers")]
     public class CustomerController : ControllerBase
     {
-        private readonly IRegistrationService _registrationService;
+        private readonly RegistrationServiceInterface _registrationService;
 
-        public CustomerController(IRegistrationService registrationService)
+        public CustomerController(RegistrationServiceInterface registrationService)
         {
             _registrationService = registrationService;
         }
@@ -18,7 +18,14 @@ namespace ClaimFlow.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterCustomerRequest request)
         {
-            bool taken = await _registrationService.EmailExists(request.Email);
+            if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName) ||
+                string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password) ||
+                string.IsNullOrWhiteSpace(request.Phone) || request.DateOfBirth == default)
+            {
+                return BadRequest("All fields are required");
+            }
+
+            var taken = await _registrationService.EmailExists(request.Email);
             if (taken)
                 return BadRequest("Email already in use");
 

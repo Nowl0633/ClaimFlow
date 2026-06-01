@@ -1,10 +1,11 @@
 using ClaimFlow.Data;
 using ClaimFlow.DTOs;
 using ClaimFlow.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ClaimFlow.Services;
 
-public class RegistrationService : IRegistrationService
+public class RegistrationService : RegistrationServiceInterface
 {
     private readonly AppDbContext _db;
 
@@ -15,18 +16,20 @@ public class RegistrationService : IRegistrationService
 
     public async Task<bool> EmailExists(string email)
     {
-        return _db.Customers.Any(c => c.Email == email);
+        return await _db.Customers.AnyAsync(c => c.Email == email.ToLower().Trim());
     }
 
     public async Task<RegisterCustomerResponse> Register(RegisterCustomerRequest request)
     {
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
         var customer = new Customer
         {
             Id = Guid.NewGuid(),
             FirstName = request.FirstName,
             LastName = request.LastName,
             Email = request.Email.ToLower().Trim(),
-            Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            Password = hashedPassword,
             DateOfBirth = request.DateOfBirth,
             Phone = request.Phone,
             CreatedAt = DateTime.UtcNow

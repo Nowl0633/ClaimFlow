@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "XvwFyvUgTZRIt+TLkgYbGyJYNaRC3zns/dOpBELBUxI=",
+  "Source": "ClaimFlow",
+  "BasePath": "_content/ClaimFlow",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
