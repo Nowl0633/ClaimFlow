@@ -10,5 +10,6 @@ namespace ClaimFlow.Data
         }
 
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<Quote> Quotes { get; set; }
     }
 }

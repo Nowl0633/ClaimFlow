@@ -9,10 +9,12 @@ namespace ClaimFlow.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly RegistrationServiceInterface _registrationService;
+        private readonly LoginServiceInterface _loginService;
 
-        public CustomerController(RegistrationServiceInterface registrationService)
+        public CustomerController(RegistrationServiceInterface registrationService, LoginServiceInterface loginService)
         {
             _registrationService = registrationService;
+            _loginService = loginService;
         }
 
         [HttpPost("register")]
@@ -31,6 +33,19 @@ namespace ClaimFlow.Controllers
 
             var result = await _registrationService.Register(request);
             return CreatedAtAction(nameof(Register), result);
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+                return BadRequest("Email and password are required");
+
+            var result = await _loginService.Login(request);
+            if (result == null)
+                return Unauthorized("Invalid email or password");
+
+            return Ok(result);
         }
     }
 }
