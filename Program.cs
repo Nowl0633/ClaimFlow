@@ -1,5 +1,6 @@
 using System.Text;
 using ClaimFlow.Data;
+using Microsoft.AspNetCore.Mvc;
 using ClaimFlow.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +34,27 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddControllers();
+
+// Custom error response for model validation failures
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = ctx =>
+    {
+        var errors = new List<string>();
+
+        foreach (var entry in ctx.ModelState)
+        {
+            if (entry.Value?.Errors.Count > 0)
+            {
+                foreach (var err in entry.Value.Errors)
+                    errors.Add(err.ErrorMessage);
+            }
+        }
+
+        return new BadRequestObjectResult(new { errors });
+    };
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -62,6 +84,8 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
