@@ -1,20 +1,27 @@
 using System.Text;
 using ClaimFlow.Data;
-using Microsoft.AspNetCore.Mvc;
-using ClaimFlow.Services;
+using Login.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Policies.Controllers;
+using Policies.Services;
+using Quotes.Services;
+using Registration.Controllers;
+using Registration.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        x => x.MigrationsAssembly("ClaimFlow")));
 
-builder.Services.AddScoped<RegistrationServiceInterface, RegistrationService>();
-builder.Services.AddScoped<LoginServiceInterface, LoginService>();
-builder.Services.AddScoped<QuoteServiceInterface, QuoteService>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IQuoteService, QuoteService>();
+builder.Services.AddScoped<IPolicyService, PolicyService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 
@@ -33,9 +40,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddControllers();
+// frontend runs on 5200, has to match otherwise the browser blocks the requests
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:5200")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
-// Custom error response for model validation failures
+// each service is its own project so we have to tell asp.net where to find the controllers
+builder.Services.AddControllers()
+    .AddApplicationPart(typeof(CustomersController).Assembly)
+    .AddApplicationPart(typeof(Login.Controllers.AuthController).Assembly)
+    .AddApplicationPart(typeof(Quotes.Controllers.QuotesController).Assembly)
+    .AddApplicationPart(typeof(PoliciesController).Assembly);
+
+// without this the default validation error format is a nightmare to parse in javascript
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = ctx =>
@@ -56,6 +79,9 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
+
+// this whole block is boilerplate so the lock icon in swagger actually works
+// without it you cant test authenticated endpoints from the browser
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -84,8 +110,7 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseDefaultFiles();
-app.UseStaticFiles();
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

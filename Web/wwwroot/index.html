@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClaimFlow</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #f5f7fa;
+            font-family: sans-serif;
+            color: #222;
+            font-size: 14px;
+        }
+
+        .page { display: none; min-height: 100vh; }
+        .page.active { display: block; animation: fadeIn 0.18s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-wrap {
+            display: flex;
+            justify-content: center;
+            padding: 60px 16px;
+        }
+
+        .auth-box {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.09);
+            padding: 36px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .auth-box h1 { font-size: 26px; color: #1a73e8; margin-bottom: 2px; }
+        .auth-box .tagline { color: #999; font-size: 13px; margin-bottom: 28px; }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e8e8e8;
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 8px 18px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #999;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn.active { color: #1a73e8; border-bottom-color: #1a73e8; font-weight: 500; }
+
+        .app-header {
+            background: white;
+            border-bottom: 1px solid #e8e8e8;
+            padding: 0 28px;
+            height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .app-header .logo { font-size: 17px; font-weight: 700; color: #1a73e8; }
+
+        .app-header .user-area {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .app-body { max-width: 540px; margin: 40px auto; padding: 0 16px; }
+        .app-body h2 { font-size: 20px; margin-bottom: 20px; color: #111; }
+
+        .form-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+        }
+
+        .field { margin-bottom: 14px; }
+
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+
+        input {
+            width: 100%;
+            padding: 9px 11px;
+            border: 1px solid #d0d0d0;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #222;
+        }
+
+        input:focus { outline: none; border-color: #1a73e8; }
+
+        .btn { padding: 10px 20px; border-radius: 5px; font-size: 14px; cursor: pointer; border: none; }
+        .btn-primary { background: #1a73e8; color: white; width: 100%; margin-top: 6px; }
+        .btn-primary:hover { background: #1558b0; }
+        .btn-outline { background: white; color: #1a73e8; border: 1px solid #1a73e8; }
+        .btn-outline:hover { background: #e8f0fe; }
+        .btn-ghost { background: none; border: none; color: #888; font-size: 13px; cursor: pointer; padding: 6px 10px; }
+        .btn-ghost:hover { color: #333; }
+
+        .action-row { display: flex; gap: 10px; margin-top: 20px; align-items: center; }
+
+        .error-msg {
+            display: none;
+            color: #c62828;
+            background: #fdecea;
+            border: 1px solid #e57373;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f2f2f2;
+            font-size: 14px;
+        }
+
+        .summary-row:last-child { border-bottom: none; }
+        .summary-row .lbl { color: #777; }
+        .summary-row .val { font-weight: 500; }
+
+        .premium-block {
+            background: #e8f0fe;
+            border-radius: 6px;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 18px;
+        }
+
+        .premium-block .lbl { color: #1a73e8; font-weight: 500; }
+        .premium-block .amount { font-size: 24px; font-weight: 700; color: #1a73e8; }
+
+        .success-banner {
+            background: #e6f4ea;
+            border: 1px solid #81c784;
+            border-radius: 8px;
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #2e7d32;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .badge-active { background: #e6f4ea; color: #2e7d32; }
+
+        .success-msg { display: none; color: #2e7d32; font-size: 13px; margin-top: 10px; }
+
+        .link-btn {
+            background: none;
+            border: none;
+            color: #1a73e8;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+            margin-top: 14px;
+            display: inline-block;
+        }
+
+        .link-btn:hover { color: #1558b0; }
+
+        .back-link {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 0;
+            margin-top: 16px;
+            display: block;
+        }
+
+        .back-link:hover { color: #333; }
+
+        .forgot-heading {
+            font-size: 15px;
+            font-weight: 600;
+            color: #111;
+            margin-bottom: 6px;
+        }
+
+        .forgot-sub {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- auth -->
+    <div id="authPage" class="page active">
+        <div class="auth-wrap">
+            <div class="auth-box">
+                <h1>ClaimFlow</h1>
+                <p class="tagline">Travel Insurance Portal</p>
+
+                <div class="tabs" id="authTabs">
+                    <button class="tab-btn active" onclick="switchTab('register')">Register</button>
+                    <button class="tab-btn" onclick="switchTab('login')">Login</button>
+                </div>
+
+                <!-- Register panel -->
+                <div id="registerPanel">
+                    <form id="registerForm">
+                        <div class="row-2">
+                            <div class="field">
+                                <label>First Name</label>
+                                <input type="text" id="r_first" placeholder="Jane" />
+                            </div>
+                            <div class="field">
+                                <label>Last Name</label>
+                                <input type="text" id="r_last" placeholder="Smith" />
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Email</label>
+                            <input type="email" id="r_email" placeholder="jane@example.com" />
+                        </div>
+                        <div class="field">
+                            <label>Password</label>
+                            <input type="password" id="r_password" />
+                        </div>
+                        <div class="row-2">
+                            <div class="field">
+                                <label>Date of Birth</label>
+                                <input type="date" id="r_dob" />
+                            </div>
+                            <div class="field">
+                                <label>Phone</label>
+                                <input type="tel" id="r_phone" placeholder="07700 900000" />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Account</button>
+                    </form>
+                    <div id="registerError" class="error-msg"></div>
+                    <p id="registerSuccess" class="success-msg">Account created — you can now log in.</p>
+                </div>
+
+                <!-- Login panel -->
+                <div id="loginPanel" style="display:none">
+                    <form id="loginForm">
+                        <div class="field">
+                            <label>Email</label>
+                            <input type="email" id="l_email" placeholder="jane@example.com" />
+                        </div>
+                        <div class="field">
+                            <label>Password</label>
+                            <input type="password" id="l_password" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                    <div id="loginError" class="error-msg"></div>
+                    <button class="link-btn" onclick="switchTab('forgot')">Forgot your password?</button>
+                </div>
+
+                <!-- Forgot password panel -->
+                <div id="forgotPanel" style="display:none">
+                    <p class="forgot-heading">Reset your password</p>
+                    <p class="forgot-sub">Enter your email and choose a new password.</p>
+                    <form id="forgotForm">
+                        <div class="field">
+                            <label>Email</label>
+                            <input type="email" id="f_email" placeholder="jane@example.com" />
+                        </div>
+                        <div class="field">
+                            <label>New Password</label>
+                            <input type="password" id="f_password" />
+                        </div>
+                        <div class="field">
+                            <label>Confirm New Password</label>
+                            <input type="password" id="f_confirm" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Reset Password</button>
+                    </form>
+                    <div id="forgotError" class="error-msg"></div>
+                    <p id="forgotSuccess" class="success-msg">Password updated — you can now log in.</p>
+                    <button class="back-link" onclick="switchTab('login')">← Back to login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- quote form -->
+    <div id="quotePage" class="page">
+        <div class="app-header">
+            <span class="logo">ClaimFlow</span>
+            <div class="user-area">
+                <span id="headerName"></span>
+                <button class="btn-ghost" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        <div class="app-body">
+            <h2>Get a Quote</h2>
+            <div class="form-card">
+                <form id="quoteForm">
+                    <div class="field">
+                        <label>Destination</label>
+                        <input type="text" id="q_dest" placeholder="e.g. Japan" />
+                    </div>
+                    <div class="row-2">
+                        <div class="field">
+                            <label>Departure Date</label>
+                            <input type="date" id="q_start" />
+                        </div>
+                        <div class="field">
+                            <label>Return Date</label>
+                            <input type="date" id="q_end" />
+                        </div>
+                    </div>
+                    <div class="row-2">
+                        <div class="field">
+                            <label>Trip Cost (£)</label>
+                            <input type="number" id="q_cost" placeholder="2500" step="0.01" min="0" />
+                        </div>
+                        <div class="field">
+                            <label>Travellers</label>
+                            <input type="number" id="q_travelers" placeholder="2" min="1" />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Get My Quote</button>
+                </form>
+                <div id="quoteError" class="error-msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- review -->
+    <div id="reviewPage" class="page">
+        <div class="app-header">
+            <span class="logo">ClaimFlow</span>
+            <div class="user-area">
+                <span id="headerName2"></span>
+                <button class="btn-ghost" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        <div class="app-body">
+            <h2>Your Quote</h2>
+            <div class="summary-card" id="quoteDisplay"></div>
+            <div id="acceptError" class="error-msg"></div>
+            <div class="action-row">
+                <button class="btn btn-primary" id="acceptBtn" style="width:auto; margin-top:0">Accept &amp; Buy Policy</button>
+                <button class="btn btn-outline" onclick="showPage('quotePage')">&#8592; Back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- policy confirmation -->
+    <div id="policyPage" class="page">
+        <div class="app-header">
+            <span class="logo">ClaimFlow</span>
+            <div class="user-area">
+                <span id="headerName3"></span>
+                <button class="btn-ghost" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        <div class="app-body">
+            <div class="success-banner">&#10003; &nbsp;You're covered!</div>
+            <div class="summary-card" id="policyDisplay"></div>
+            <div class="action-row">
+                <button class="btn btn-outline" onclick="showPage('quotePage')">Get Another Quote</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var API = 'http://localhost:5124';
+
+        var token = null;
+        var currentQuoteId = null;
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(function(p) {
+                p.classList.remove('active');
+            });
+            document.getElementById(id).classList.add('active');
+        }
+
+        function switchTab(tab) {
+            document.getElementById('registerPanel').style.display = tab === 'register' ? 'block' : 'none';
+            document.getElementById('loginPanel').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('forgotPanel').style.display = tab === 'forgot' ? 'block' : 'none';
+
+            // hide the tab bar on forgot so it doesnt look weird
+            document.getElementById('authTabs').style.display = tab === 'forgot' ? 'none' : 'flex';
+
+            var tabs = document.querySelectorAll('.tab-btn');
+            tabs[0].classList.toggle('active', tab === 'register');
+            tabs[1].classList.toggle('active', tab === 'login');
+        }
+
+        function logout() {
+            token = null;
+            currentQuoteId = null;
+            showPage('authPage');
+        }
+
+        function setName(name) {
+            document.getElementById('headerName').textContent = 'Hi, ' + name;
+            document.getElementById('headerName2').textContent = 'Hi, ' + name;
+            document.getElementById('headerName3').textContent = 'Hi, ' + name;
+        }
+
+        function showError(id, msg) {
+            var el = document.getElementById(id);
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        function clearError(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // handles all the different error shapes the api can return
+        function extractError(data) {
+            if (data.errors && data.errors.length) return data.errors.join(', ');
+            if (data.message) return data.message;
+            if (typeof data === 'string') return data;
+            return null;
+        }
+
+        function fmtDate(str) {
+            return new Date(str).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function fmtMoney(n) {
+            return '£' + parseFloat(n).toFixed(2);
+        }
+
+        function row(label, value) {
+            return '<div class="summary-row"><span class="lbl">' + label + '</span><span class="val">' + value + '</span></div>';
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearError('registerError');
+
+            var body = {
+                firstName: document.getElementById('r_first').value,
+                lastName: document.getElementById('r_last').value,
+                email: document.getElementById('r_email').value,
+                password: document.getElementById('r_password').value,
+                dateOfBirth: (document.getElementById('r_dob').value || '0001-01-01') + 'T00:00:00',
+                phone: document.getElementById('r_phone').value
+            };
+
+            try {
+                var res = await fetch(API + '/api/customers/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                var data = await res.json();
+
+                if (!res.ok) {
+                    showError('registerError', extractError(data) || 'Registration failed');
+                    return;
+                }
+
+                document.getElementById('registerSuccess').style.display = 'block';
+                document.getElementById('registerForm').reset();
+                setTimeout(function() {
+                    document.getElementById('registerSuccess').style.display = 'none';
+                    switchTab('login');
+                }, 1600);
+
+            } catch (err) {
+                showError('registerError', 'Could not reach the server');
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearError('loginError');
+
+            var loginBody = {
+                email: document.getElementById('l_email').value,
+                password: document.getElementById('l_password').value
+            };
+
+            try {
+                var loginRes = await fetch(API + '/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loginBody)
+                });
+
+                var loginData = await loginRes.json();
+
+                if (!loginRes.ok) {
+                    showError('loginError', extractError(loginData) || 'Invalid email or password');
+                    return;
+                }
+
+                token = loginData.token;
+                setName(loginData.name);
+                showPage('quotePage');
+
+            } catch (err) {
+                showError('loginError', 'Could not reach the server');
+            }
+        });
+
+        document.getElementById('forgotForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearError('forgotError');
+
+            var newPass = document.getElementById('f_password').value;
+            var confirm = document.getElementById('f_confirm').value;
+
+            if (newPass !== confirm) {
+                showError('forgotError', 'Passwords do not match');
+                return;
+            }
+
+            var body = {
+                email: document.getElementById('f_email').value,
+                newPassword: newPass
+            };
+
+            try {
+                var res = await fetch(API + '/api/customers/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                var data = await res.json();
+
+                if (!res.ok) {
+                    showError('forgotError', extractError(data) || 'Could not reset password');
+                    return;
+                }
+
+                document.getElementById('forgotSuccess').style.display = 'block';
+                document.getElementById('forgotForm').reset();
+                setTimeout(function() {
+                    document.getElementById('forgotSuccess').style.display = 'none';
+                    switchTab('login');
+                }, 1800);
+
+            } catch (err) {
+                showError('forgotError', 'Could not reach the server');
+            }
+        });
+
+        document.getElementById('quoteForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearError('quoteError');
+
+            var quoteBody = {
+                destination: document.getElementById('q_dest').value,
+                startDate: (document.getElementById('q_start').value || '0001-01-01') + 'T00:00:00',
+                endDate: (document.getElementById('q_end').value || '0001-01-01') + 'T00:00:00',
+                tripCost: parseFloat(document.getElementById('q_cost').value),
+                numberOfTravelers: parseInt(document.getElementById('q_travelers').value)
+            };
+
+            try {
+                var resp = await fetch(API + '/api/quotes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(quoteBody)
+                });
+
+                var data = await resp.json();
+
+                if (!resp.ok) {
+                    showError('quoteError', extractError(data) || 'Could not generate quote');
+                    return;
+                }
+
+                currentQuoteId = data.quoteId;
+                renderQuote(data);
+                showPage('reviewPage');
+
+            } catch (err) {
+                showError('quoteError', 'Could not reach the server');
+            }
+        });
+
+        function renderQuote(q) {
+            document.getElementById('quoteDisplay').innerHTML =
+                row('Destination', q.destination) +
+                row('Departure', fmtDate(q.startDate)) +
+                row('Return', fmtDate(q.endDate)) +
+                row('Travellers', q.numberOfTravelers) +
+                row('Trip Value', fmtMoney(q.tripCost)) +
+                '<div class="premium-block"><span class="lbl">Your Premium</span><span class="amount">' + fmtMoney(q.premiumAmount) + '</span></div>';
+        }
+
+        document.getElementById('acceptBtn').addEventListener('click', async function() {
+            clearError('acceptError');
+
+            try {
+                var res = await fetch(API + '/api/policies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ quoteId: currentQuoteId })
+                });
+
+                var data = await res.json();
+
+                if (!res.ok) {
+                    showError('acceptError', extractError(data) || 'Could not accept quote');
+                    return;
+                }
+
+                renderPolicy(data);
+                showPage('policyPage');
+
+            } catch (err) {
+                showError('acceptError', 'Could not reach the server');
+            }
+        });
+
+        function renderPolicy(p) {
+            document.getElementById('policyDisplay').innerHTML =
+                row('Policy ID', '<span style="font-size:12px;color:#999">' + p.policyId + '</span>') +
+                row('Status', '<span class="badge badge-active">' + p.status + '</span>') +
+                row('Destination', p.destination) +
+                row('Departure', fmtDate(p.startDate)) +
+                row('Return', fmtDate(p.endDate)) +
+                '<div class="premium-block"><span class="lbl">Premium Paid</span><span class="amount">' + fmtMoney(p.premiumPaid) + '</span></div>';
+        }
+    </script>
+
+</body>
+</html>

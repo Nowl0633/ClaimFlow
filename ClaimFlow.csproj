@@ -4,14 +4,29 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10" />
-    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Services\**\*" />
+    <Compile Remove="Shared\**\*" />
+    <Compile Remove="Web\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="Shared\Shared.csproj" />
+    <ProjectReference Include="Services\Registration\Registration.csproj" />
+    <ProjectReference Include="Services\Login\Login.csproj" />
+    <ProjectReference Include="Services\Quotes\Quotes.csproj" />
+    <ProjectReference Include="Services\Policies\Policies.csproj" />
   </ItemGroup>
 
 </Project>

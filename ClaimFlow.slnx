@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Services/">
+    <Project Path="Services/Login/Login.csproj" />
+    <Project Path="Services/Policies/Policies.csproj" />
+    <Project Path="Services/Quotes/Quotes.csproj" />
+    <Project Path="Services/Registration/Registration.csproj" />
+  </Folder>
+  <Project Path="ClaimFlow.csproj" />
+  <Project Path="Shared/Shared.csproj" />
+  <Project Path="Web/Web.csproj" />
+</Solution>
