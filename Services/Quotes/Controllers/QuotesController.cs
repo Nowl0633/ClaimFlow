@@ -21,7 +21,6 @@ namespace Quotes.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateQuote([FromBody] QuoteRequest request)
         {
-            // pull the customer id out of the JWT token
             var customerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
             try

@@ -450,7 +450,6 @@
             document.getElementById(id).style.display = 'none';
         }
 
-        // handles all the different error shapes the api can return
         function extractError(data) {
             if (data.errors && data.errors.length) return data.errors.join(', ');
             if (data.message) return data.message;

@@ -20,9 +20,10 @@ namespace Registration.Services
             if (emailTaken)
                 throw new InvalidOperationException("Email already registered.");
 
+            var id = Guid.NewGuid();
             var customer = new Customer
             {
-                Id = Guid.NewGuid(),
+                Id = id,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 Email = request.Email,

@@ -21,7 +21,6 @@ namespace Policies.Controllers
         [HttpPost]
         public async Task<IActionResult> AcceptQuote([FromBody] AcceptQuoteRequest request)
         {
-            // pull the customer id out of the JWT token
             var customerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
             try

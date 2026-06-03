@@ -19,6 +19,7 @@
     <Compile Remove="Services\**\*" />
     <Compile Remove="Shared\**\*" />
     <Compile Remove="Web\**\*" />
+    <Compile Remove="Tests\**\*" />
   </ItemGroup>
 
   <ItemGroup>
