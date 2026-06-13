@@ -8,4 +8,5 @@
   <Project Path="ClaimFlow.csproj" />
   <Project Path="Shared/Shared.csproj" />
   <Project Path="Web/Web.csproj" />
+  <Project Path="Tests/ClaimFlow.Tests.csproj" />
 </Solution>

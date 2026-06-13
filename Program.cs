@@ -20,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
+
 builder.Services.AddScoped<IQuoteService, QuoteService>();
 builder.Services.AddScoped<IPolicyService, PolicyService>();
 
