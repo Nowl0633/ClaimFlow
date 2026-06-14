@@ -5,13 +5,13 @@ namespace Registration.DTOs
     public class RegisterCustomerRequest
     {
         [Required]
-        public string FirstName { get; set; } = string.Empty;
+        public string FirstName { get; set; } = "";
         [Required]
-        public string LastName { get; set; } = string.Empty;
+        public string LastName { get; set; } = "";
 
         [Required]
         [EmailAddress]
-        public string Email { get; set; } = string.Empty;
+        public string Email { get; set; } = "";
 
         [Required]
         [MinLength(6)]
@@ -19,6 +19,7 @@ namespace Registration.DTOs
 
         [Required]
         public DateTime DateOfBirth { get; set; }
+
         public string Phone { get; set; } = "";
     }
 }

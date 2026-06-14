@@ -25,8 +25,8 @@ namespace Quotes.Controllers
 
             try
             {
-                var result = await _service.CreateQuoteAsync(customerId, request);
-                return Ok(result);
+                var quote = await _service.CreateQuoteAsync(customerId, request);
+                return Ok(quote);
             }
             catch (ArgumentException ex)
             {

@@ -36,6 +36,7 @@ namespace Registration.Controllers
             {
                 await _service.ResetPasswordAsync(request);
                 return Ok(new { message = "Password updated." });
+
             }
             catch (KeyNotFoundException ex)
             {

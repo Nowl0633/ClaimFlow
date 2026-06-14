@@ -37,6 +37,7 @@ namespace ClaimFlow.Tests.Registration
         {
             var context = CreateContext();
             var service = new RegistrationService(context);
+
             var request = new RegisterCustomerRequest
             {
                 FirstName = "Jane",
@@ -48,6 +49,7 @@ namespace ClaimFlow.Tests.Registration
 
             await service.RegisterAsync(request);
 
+            // second time with same email should fail
             await Assert.ThrowsAsync<InvalidOperationException>(
                 () => service.RegisterAsync(request));
         }
@@ -56,9 +58,9 @@ namespace ClaimFlow.Tests.Registration
         public async Task Register_PasswordIsHashed()
         {
             var context = CreateContext();
-            var service = new RegistrationService(context);
+            var svc = new RegistrationService(context);
 
-            await service.RegisterAsync(new RegisterCustomerRequest
+            await svc.RegisterAsync(new RegisterCustomerRequest
             {
                 FirstName = "Jane",
                 LastName = "Smith",

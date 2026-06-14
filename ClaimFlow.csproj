@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Compile Remove="Services\**\*" />
+    <Compile Remove="Services\Claims\**\*" />
     <Compile Remove="Shared\**\*" />
     <Compile Remove="Web\**\*" />
     <Compile Remove="Tests\**\*" />
@@ -28,6 +29,8 @@
     <ProjectReference Include="Services\Login\Login.csproj" />
     <ProjectReference Include="Services\Quotes\Quotes.csproj" />
     <ProjectReference Include="Services\Policies\Policies.csproj" />
+    <ProjectReference Include="Services\Claims\Claims.csproj" />
+    <ProjectReference Include="Services\Documents\Documents.csproj" />
   </ItemGroup>
 
 </Project>

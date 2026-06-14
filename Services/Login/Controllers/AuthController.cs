@@ -25,6 +25,7 @@ namespace Login.Controllers
             }
             catch (UnauthorizedAccessException)
             {
+                // dont tell them which bit was wrong
                 return Unauthorized(new { message = "Invalid email or password." });
             }
         }

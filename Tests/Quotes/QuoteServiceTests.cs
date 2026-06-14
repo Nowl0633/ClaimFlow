@@ -7,7 +7,7 @@ namespace ClaimFlow.Tests.Quotes
 {
     public class QuoteServiceTests
     {
-        private static AppDbContext CreateContext() => new(
+        private AppDbContext GetDb() => new(
             new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options);
@@ -15,9 +15,9 @@ namespace ClaimFlow.Tests.Quotes
         [Fact]
         public async Task CreateQuote_ValidTrip_ReturnsCorrectPremium()
         {
-            var service = new QuoteService(CreateContext());
+            var svc = new QuoteService(GetDb());
 
-            var result = await service.CreateQuoteAsync(Guid.NewGuid(), new QuoteRequest
+            var result = await svc.CreateQuoteAsync(Guid.NewGuid(), new QuoteRequest
             {
                 Destination = "Japan",
                 StartDate = new DateTime(2026, 8, 1),
@@ -34,9 +34,9 @@ namespace ClaimFlow.Tests.Quotes
         [Fact]
         public async Task CreateQuote_CheapTrip_ReturnsMinimum()
         {
-            var service = new QuoteService(CreateContext());
+            var svc = new QuoteService(GetDb());
 
-            var result = await service.CreateQuoteAsync(Guid.NewGuid(), new QuoteRequest
+            var result = await svc.CreateQuoteAsync(Guid.NewGuid(), new QuoteRequest
             {
                 Destination = "France",
                 StartDate = new DateTime(2026, 7, 1),
@@ -51,10 +51,10 @@ namespace ClaimFlow.Tests.Quotes
         [Fact]
         public async Task CreateQuote_EndBeforeStart_Throws()
         {
-            var service = new QuoteService(CreateContext());
+            var svc = new QuoteService(GetDb());
 
             await Assert.ThrowsAsync<ArgumentException>(
-                () => service.CreateQuoteAsync(Guid.NewGuid(), new QuoteRequest
+                () => svc.CreateQuoteAsync(Guid.NewGuid(), new QuoteRequest
                 {
                     Destination = "Spain",
                     StartDate = new DateTime(2026, 8, 15),
@@ -67,11 +67,11 @@ namespace ClaimFlow.Tests.Quotes
         [Fact]
         public async Task CreateQuote_SavesToDB()
         {
-            var context = CreateContext();
-            var service = new QuoteService(context);
+            var db = GetDb();
+            var svc = new QuoteService(db);
             var customerId = Guid.NewGuid();
 
-            var result = await service.CreateQuoteAsync(customerId, new QuoteRequest
+            var result = await svc.CreateQuoteAsync(customerId, new QuoteRequest
             {
                 Destination = "Italy",
                 StartDate = new DateTime(2026, 9, 1),
@@ -80,7 +80,7 @@ namespace ClaimFlow.Tests.Quotes
                 NumberOfTravelers = 1
             });
 
-            var saved = await context.Quotes.FindAsync(result.QuoteId);
+            var saved = await db.Quotes.FindAsync(result.QuoteId);
             Assert.NotNull(saved);
             Assert.Equal(customerId, saved.CustomerId);
         }

@@ -1,5 +1,9 @@
 using System.Text;
 using ClaimFlow.Data;
+using Claims.Controllers;
+using Claims.Services;
+using Documents.Controllers;
+using Documents.Services;
 using Login.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +27,8 @@ builder.Services.AddScoped<ILoginService, LoginService>();
 
 builder.Services.AddScoped<IQuoteService, QuoteService>();
 builder.Services.AddScoped<IPolicyService, PolicyService>();
+builder.Services.AddScoped<IClaimsService, ClaimsService>();
+builder.Services.AddScoped<IDocumentsService, DocumentsService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 
@@ -57,7 +63,9 @@ builder.Services.AddControllers()
     .AddApplicationPart(typeof(CustomersController).Assembly)
     .AddApplicationPart(typeof(Login.Controllers.AuthController).Assembly)
     .AddApplicationPart(typeof(Quotes.Controllers.QuotesController).Assembly)
-    .AddApplicationPart(typeof(PoliciesController).Assembly);
+    .AddApplicationPart(typeof(PoliciesController).Assembly)
+    .AddApplicationPart(typeof(ClaimsController).Assembly)
+    .AddApplicationPart(typeof(DocumentsController).Assembly);
 
 // without this the default validation error format is a nightmare to parse in javascript
 builder.Services.Configure<ApiBehaviorOptions>(options =>

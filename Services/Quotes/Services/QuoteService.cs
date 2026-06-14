@@ -20,10 +20,11 @@ namespace Quotes.Services
 
             int days = (request.EndDate - request.StartDate).Days;
 
-            // formula: 2% of trip cost + £1.50 per day per traveller, minimum £20
-            var basePremium = request.TripCost * 0.02m;
-            decimal perDayCharge = 1.50m * days * request.NumberOfTravelers;
-            decimal premium = Math.Round(Math.Max(20m, basePremium + perDayCharge), 2);
+            // formula: 2% of trip cost + £1.50 per day per traveller, min £20
+            decimal basePremium = request.TripCost * 0.02m;
+            decimal dailyCharge = 1.50m * days * request.NumberOfTravelers;
+            decimal total = basePremium + dailyCharge;
+            decimal premium = Math.Round(Math.Max(20m, total), 2);
 
             var quote = new Quote
             {

@@ -9,6 +9,6 @@ namespace Quotes.DTOs
         public decimal TripCost { get; set; }
         public int NumberOfTravelers { get; set; }
         public decimal PremiumAmount { get; set; }
-        public string Status { get; set; } = string.Empty;
+        public string Status { get; set; } = "";
     }
 }

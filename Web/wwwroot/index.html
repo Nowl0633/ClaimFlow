@@ -181,6 +181,7 @@
         }
 
         .badge-active { background: #e6f4ea; color: #2e7d32; }
+        .badge-pending { background: #fef3e2; color: #e65100; }
 
         .success-msg { display: none; color: #2e7d32; font-size: 13px; margin-top: 10px; }
 
@@ -397,7 +398,71 @@
             <div class="success-banner">&#10003; &nbsp;You're covered!</div>
             <div class="summary-card" id="policyDisplay"></div>
             <div class="action-row">
-                <button class="btn btn-outline" onclick="showPage('quotePage')">Get Another Quote</button>
+                <button class="btn btn-primary" id="submitClaimBtn" style="width:auto; margin-top:0">Submit a Claim</button>
+                <button class="btn btn-outline" onclick="showPage('myClaimsPage')">My Claims</button>
+                <button class="btn-ghost" onclick="showPage('quotePage')">New Quote</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- submit claim -->
+    <div id="claimPage" class="page">
+        <div class="app-header">
+            <span class="logo">ClaimFlow</span>
+            <div class="user-area">
+                <span id="headerName4"></span>
+                <button class="btn-ghost" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        <div class="app-body">
+            <h2>Submit a Claim</h2>
+            <div class="form-card">
+                <form id="claimForm">
+                    <div class="field">
+                        <label>What happened?</label>
+                        <input type="text" id="cl_description" placeholder="Briefly describe your claim" />
+                    </div>
+                    <div class="row-2">
+                        <div class="field">
+                            <label>Claim Type</label>
+                            <select id="cl_type" style="width:100%; padding:9px 11px; border:1px solid #d0d0d0; border-radius:5px; font-size:14px; color:#222;">
+                                <option value="">Select...</option>
+                                <option value="Medical">Medical</option>
+                                <option value="Cancellation">Cancellation</option>
+                                <option value="Lost Luggage">Lost Luggage</option>
+                                <option value="Delay">Delay</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Claim Amount (£)</label>
+                            <input type="number" id="cl_amount" placeholder="500" step="0.01" min="1" />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Claim</button>
+                </form>
+                <div id="claimError" class="error-msg"></div>
+                <p id="claimSuccess" class="success-msg">Claim submitted successfully.</p>
+            </div>
+            <button class="btn-ghost" style="margin-top:16px" onclick="showPage('policyPage')">&#8592; Back</button>
+        </div>
+    </div>
+
+    <!-- my claims -->
+    <div id="myClaimsPage" class="page">
+        <div class="app-header">
+            <span class="logo">ClaimFlow</span>
+            <div class="user-area">
+                <span id="headerName5"></span>
+                <button class="btn-ghost" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        <div class="app-body">
+            <h2>My Claims</h2>
+            <div id="claimsError" class="error-msg"></div>
+            <div id="claimsList"></div>
+            <div class="action-row" style="margin-top:20px">
+                <button class="btn btn-outline" onclick="showPage('quotePage')">New Quote</button>
             </div>
         </div>
     </div>
@@ -407,6 +472,7 @@
 
         var token = null;
         var currentQuoteId = null;
+        var currentPolicyId = null;
 
         function showPage(id) {
             document.querySelectorAll('.page').forEach(function(p) {
@@ -431,13 +497,18 @@
         function logout() {
             token = null;
             currentQuoteId = null;
+            currentPolicyId = null;
             showPage('authPage');
         }
 
         function setName(name) {
-            document.getElementById('headerName').textContent = 'Hi, ' + name;
-            document.getElementById('headerName2').textContent = 'Hi, ' + name;
-            document.getElementById('headerName3').textContent = 'Hi, ' + name;
+            // each page has its own header so we have to update all of them
+            var greeting = 'Hi, ' + name;
+            document.getElementById('headerName').textContent = greeting;
+            document.getElementById('headerName2').textContent = greeting;
+            document.getElementById('headerName3').textContent = greeting;
+            document.getElementById('headerName4').textContent = greeting;
+            document.getElementById('headerName5').textContent = greeting;
         }
 
         function showError(id, msg) {
@@ -660,6 +731,7 @@
         });
 
         function renderPolicy(p) {
+            currentPolicyId = p.policyId;
             document.getElementById('policyDisplay').innerHTML =
                 row('Policy ID', '<span style="font-size:12px;color:#999">' + p.policyId + '</span>') +
                 row('Status', '<span class="badge badge-active">' + p.status + '</span>') +
@@ -668,6 +740,201 @@
                 row('Return', fmtDate(p.endDate)) +
                 '<div class="premium-block"><span class="lbl">Premium Paid</span><span class="amount">' + fmtMoney(p.premiumPaid) + '</span></div>';
         }
+
+        document.getElementById('submitClaimBtn').addEventListener('click', function() {
+            if (!currentPolicyId) return;
+            clearError('claimError');
+            document.getElementById('claimSuccess').style.display = 'none';
+            document.getElementById('claimForm').reset();
+            showPage('claimPage');
+        });
+
+        document.getElementById('claimForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearError('claimError');
+
+            var body = {
+                policyId: currentPolicyId,
+                description: document.getElementById('cl_description').value,
+                claimType: document.getElementById('cl_type').value,
+                amount: parseFloat(document.getElementById('cl_amount').value)
+            };
+
+            try {
+                var res = await fetch(API + '/api/claims', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(body)
+                });
+
+                var data = await res.json();
+
+                if (!res.ok) {
+                    showError('claimError', extractError(data) || 'Could not submit claim');
+                    return;
+                }
+
+                document.getElementById('claimSuccess').style.display = 'block';
+                document.getElementById('claimForm').reset();
+                setTimeout(function() {
+                    document.getElementById('claimSuccess').style.display = 'none';
+                    showPage('myClaimsPage');
+                    loadMyClaims();
+                }, 1400);
+
+            } catch (err) {
+                showError('claimError', 'Could not reach the server');
+            }
+        });
+
+        async function loadMyClaims() {
+            clearError('claimsError');
+            document.getElementById('claimsList').innerHTML = '<p style="color:#999;font-size:13px">Loading...</p>';
+
+            try {
+                var res = await fetch(API + '/api/claims', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                var data = await res.json();
+
+                if (!res.ok) {
+                    showError('claimsError', extractError(data) || 'Could not load claims');
+                    document.getElementById('claimsList').innerHTML = '';
+                    return;
+                }
+
+                if (!data.length) {
+                    document.getElementById('claimsList').innerHTML = '<p style="color:#999;font-size:13px">No claims yet.</p>';
+                    return;
+                }
+
+                var html = '';
+                data.forEach(function(c) {
+                    var badgeClass = c.status === 'Approved' || c.status === 'Settled' ? 'badge-active' : 'badge-pending';
+                    html += '<div class="summary-card" style="margin-bottom:12px">' +
+                        row('Type', c.claimType) +
+                        row('Description', c.description) +
+                        row('Amount', fmtMoney(c.amount)) +
+                        row('Status', '<span class="badge ' + badgeClass + '">' + c.status + '</span>') +
+                        row('Submitted', fmtDate(c.submittedAt)) +
+                        '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #f2f2f2">' +
+                        '<div id="docs-' + c.claimId + '" style="margin-bottom:8px;font-size:13px;color:#999">Loading documents...</div>' +
+                        '<label style="display:inline-block;cursor:pointer;font-size:13px;color:#1a73e8;text-decoration:underline">' +
+                        'Attach file' +
+                        '<input type="file" style="display:none" onchange="uploadDoc(\'' + c.claimId + '\', this)" />' +
+                        '</label>' +
+                        '</div>' +
+                        '</div>';
+                });
+                document.getElementById('claimsList').innerHTML = html;
+
+                data.forEach(function(c) { loadDocs(c.claimId); });
+
+            } catch (err) {
+                showError('claimsError', 'Could not reach the server');
+            }
+        }
+
+        document.getElementById('myClaimsPage').addEventListener('click', function(e) {
+            if (e.target.id === 'myClaimsPage') return;
+        });
+
+        async function loadDocs(claimId) {
+            var el = document.getElementById('docs-' + claimId);
+            if (!el) return;
+
+            try {
+                var res = await fetch(API + '/api/documents/' + claimId, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var data = await res.json();
+
+                if (!data.length) {
+                    el.textContent = 'No documents attached.';
+                    return;
+                }
+
+                el.innerHTML = data.map(function(d) {
+                    return '<div style="margin-bottom:4px">' +
+                        '<a href="' + API + '/api/documents/download/' + d.documentId + '" ' +
+                        'style="color:#1a73e8;font-size:13px" ' +
+                        'onclick="downloadDoc(event, \'' + d.documentId + '\', \'' + d.fileName + '\')">' +
+                        d.fileName + '</a>' +
+                        ' <span style="color:#ccc;font-size:12px">(' + (d.fileSize / 1024).toFixed(0) + ' KB)</span>' +
+                        ' <button onclick="deleteDoc(\'' + d.documentId + '\', \'' + claimId + '\')" ' +
+                        'style="background:none;border:none;color:#999;cursor:pointer;font-size:12px;margin-left:6px">remove</button>' +
+                        '</div>';
+                }).join('');
+            } catch (err) {
+                el.textContent = 'Could not load documents.';
+            }
+        }
+
+        async function uploadDoc(claimId, input) {
+            if (!input.files.length) return;
+            var file = input.files[0];
+            var form = new FormData();
+            form.append('file', file);
+
+            try {
+                var res = await fetch(API + '/api/documents/' + claimId, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    body: form
+                });
+
+                if (!res.ok) {
+                    var d = await res.json();
+                    alert(extractError(d) || 'Upload failed');
+                    return;
+                }
+
+                loadDocs(claimId);
+            } catch (err) {
+                alert('Could not reach the server');
+            }
+        }
+
+        async function deleteDoc(docId, claimId) {
+            if (!confirm('Remove this document?')) return;
+
+            try {
+                await fetch(API + '/api/documents/' + docId, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                loadDocs(claimId);
+            } catch (err) {
+                alert('Could not reach the server');
+            }
+        }
+
+        function downloadDoc(e, docId, fileName) {
+            e.preventDefault();
+            fetch(API + '/api/documents/download/' + docId, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(function(r) { return r.blob(); })
+            .then(function(blob) {
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // load claims whenever the page becomes visible
+        var claimsPageObserver = new MutationObserver(function(mutations) {
+            mutations.forEach(function(m) {
+                if (m.target.id === 'myClaimsPage' && m.target.classList.contains('active')) {
+                    loadMyClaims();
+                }
+            });
+        });
+        claimsPageObserver.observe(document.getElementById('myClaimsPage'), { attributes: true, attributeFilter: ['class'] });
     </script>
 
 </body>

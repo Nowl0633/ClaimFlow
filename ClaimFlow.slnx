@@ -4,6 +4,8 @@
     <Project Path="Services/Policies/Policies.csproj" />
     <Project Path="Services/Quotes/Quotes.csproj" />
     <Project Path="Services/Registration/Registration.csproj" />
+    <Project Path="Services/Claims/Claims.csproj" />
+    <Project Path="Services/Documents/Documents.csproj" />
   </Folder>
   <Project Path="ClaimFlow.csproj" />
   <Project Path="Shared/Shared.csproj" />

@@ -25,8 +25,8 @@ namespace Policies.Controllers
 
             try
             {
-                var result = await _service.AcceptQuoteAsync(customerId, request.QuoteId);
-                return Ok(result);
+                var policy = await _service.AcceptQuoteAsync(customerId, request.QuoteId);
+                return Ok(policy);
             }
             catch (KeyNotFoundException ex)
             {
