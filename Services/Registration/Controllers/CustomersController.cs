@@ -25,10 +25,12 @@ namespace Registration.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                // 409 rather than 400 - the request was valid, email is just taken
                 return Conflict(new { message = ex.Message });
             }
         }
 
+        // no [Authorize] here - user might be locked out and cant log in to reset their password
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {

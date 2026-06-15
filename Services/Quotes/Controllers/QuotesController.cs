@@ -21,6 +21,7 @@ namespace Quotes.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateQuote([FromBody] QuoteRequest request)
         {
+            // NameIdentifier is the customer id we put in the token at login
             var customerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
             try

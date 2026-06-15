@@ -15,5 +15,6 @@ namespace ClaimFlow.Data
         public DbSet<Policy> Policies { get; set; }
         public DbSet<Claim> Claims { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
     }
 }

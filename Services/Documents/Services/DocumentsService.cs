@@ -1,5 +1,6 @@
 using ClaimFlow.Data;
 using ClaimFlow.Models;
+using ClaimFlow.Services;
 using Documents.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,12 @@ namespace Documents.Services
     {
         private readonly AppDbContext _db;
         private readonly string _uploadPath;
+        private readonly IAuditService? _audit;
 
-        public DocumentsService(AppDbContext db)
+        public DocumentsService(AppDbContext db, IAuditService? audit = null)
         {
             _db = db;
+            _audit = audit;
 
             // put uploads in the working dir - good enough for now
             _uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
@@ -55,6 +58,9 @@ namespace Documents.Services
 
             _db.Documents.Add(doc);
             await _db.SaveChangesAsync();
+
+            if (_audit != null)
+                await _audit.LogAsync("DocumentUploaded", "Document", doc.Id, customerId);
 
             return BuildDocResponse(doc);
         }
@@ -106,6 +112,9 @@ namespace Documents.Services
 
             _db.Documents.Remove(doc);
             await _db.SaveChangesAsync();
+
+            if (_audit != null)
+                await _audit.LogAsync("DocumentDeleted", "Document", doc.Id, customerId);
         }
 
         private DocumentResponse BuildDocResponse(Document d)

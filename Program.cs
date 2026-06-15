@@ -1,5 +1,6 @@
 using System.Text;
 using ClaimFlow.Data;
+using ClaimFlow.Services;
 using Claims.Controllers;
 using Claims.Services;
 using Documents.Controllers;
@@ -21,6 +22,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         x => x.MigrationsAssembly("ClaimFlow")));
+
+// leave SmtpHost empty and it just logs to console instead of sending - handy for local dev
+var emailSettings = builder.Configuration.GetSection("Email").Get<EmailSettings>() ?? new EmailSettings();
+builder.Services.AddSingleton(emailSettings);
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
 
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<ILoginService, LoginService>();

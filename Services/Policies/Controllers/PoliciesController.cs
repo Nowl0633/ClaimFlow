@@ -18,6 +18,15 @@ namespace Policies.Controllers
             _service = service;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetMyPolicies()
+        {
+            var customerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var policies = await _service.GetMyPoliciesAsync(customerId);
+            return Ok(policies);
+        }
+
+        // this is what converts a quote into an actual policy
         [HttpPost]
         public async Task<IActionResult> AcceptQuote([FromBody] AcceptQuoteRequest request)
         {

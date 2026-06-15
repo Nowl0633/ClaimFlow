@@ -43,7 +43,7 @@ namespace Quotes.Services
             _context.Quotes.Add(quote);
             await _context.SaveChangesAsync();
 
-            return new QuoteResponse
+            var response = new QuoteResponse
             {
                 QuoteId = quote.Id,
                 Destination = quote.Destination,
@@ -54,6 +54,8 @@ namespace Quotes.Services
                 PremiumAmount = quote.PremiumAmount,
                 Status = quote.Status
             };
+
+            return response;
         }
     }
 }

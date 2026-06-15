@@ -224,6 +224,37 @@
             color: #888;
             margin-bottom: 20px;
         }
+
+        .dash-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            margin-top: 28px;
+        }
+
+        .dash-card {
+            background: white;
+            border-radius: 8px;
+            padding: 14px 18px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .dash-card-main { flex: 1; min-width: 0; }
+
+        .dash-card-title {
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+
+        .dash-card-sub { font-size: 12px; color: #888; }
     </style>
 </head>
 <body>
@@ -321,6 +352,48 @@
         </div>
     </div>
 
+    <!-- policy detail -->
+    <div id="policyDetailPage" class="page">
+        <div class="app-header">
+            <span class="logo">ClaimFlow</span>
+            <div class="user-area">
+                <span id="headerName7"></span>
+                <button class="btn-ghost" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        <div class="app-body" style="max-width:600px">
+            <button class="btn-ghost" style="margin-bottom:16px;padding:0" onclick="showPage('dashboardPage'); loadDashboard()">&#8592; Back to Dashboard</button>
+            <h2 id="policyDetailTitle">Policy</h2>
+            <div id="policyDetailCard" class="summary-card" style="margin-bottom:20px"></div>
+            <div id="policyDetailActions" class="action-row" style="margin-bottom:24px"></div>
+            <h3 style="font-size:14px;font-weight:600;color:#444;margin-bottom:12px">Claims on this policy</h3>
+            <div id="policyDetailClaims"></div>
+        </div>
+    </div>
+
+    <!-- dashboard -->
+    <div id="dashboardPage" class="page">
+        <div class="app-header">
+            <span class="logo">ClaimFlow</span>
+            <div class="user-area">
+                <span id="headerName6"></span>
+                <button class="btn-ghost" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        <div class="app-body" style="max-width:600px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+                <h2 style="margin-bottom:0">Overview</h2>
+                <button class="btn btn-primary" style="width:auto;margin-top:0" onclick="showPage('quotePage')">+ New Quote</button>
+            </div>
+
+            <p class="dash-section-title">My Policies</p>
+            <div id="dashPolicies"></div>
+
+            <p class="dash-section-title">Recent Claims</p>
+            <div id="dashClaims"></div>
+        </div>
+    </div>
+
     <!-- quote form -->
     <div id="quotePage" class="page">
         <div class="app-header">
@@ -362,6 +435,7 @@
                 </form>
                 <div id="quoteError" class="error-msg"></div>
             </div>
+            <button class="btn-ghost" style="margin-top:14px" onclick="showPage('dashboardPage'); loadDashboard()">&#8592; Dashboard</button>
         </div>
     </div>
 
@@ -381,6 +455,7 @@
             <div class="action-row">
                 <button class="btn btn-primary" id="acceptBtn" style="width:auto; margin-top:0">Accept &amp; Buy Policy</button>
                 <button class="btn btn-outline" onclick="showPage('quotePage')">&#8592; Back</button>
+                <button class="btn-ghost" onclick="showPage('dashboardPage'); loadDashboard()">Dashboard</button>
             </div>
         </div>
     </div>
@@ -399,7 +474,7 @@
             <div class="summary-card" id="policyDisplay"></div>
             <div class="action-row">
                 <button class="btn btn-primary" id="submitClaimBtn" style="width:auto; margin-top:0">Submit a Claim</button>
-                <button class="btn btn-outline" onclick="showPage('myClaimsPage')">My Claims</button>
+                <button class="btn btn-outline" onclick="showPage('dashboardPage'); loadDashboard()">Dashboard</button>
                 <button class="btn-ghost" onclick="showPage('quotePage')">New Quote</button>
             </div>
         </div>
@@ -444,7 +519,7 @@
                 <div id="claimError" class="error-msg"></div>
                 <p id="claimSuccess" class="success-msg">Claim submitted successfully.</p>
             </div>
-            <button class="btn-ghost" style="margin-top:16px" onclick="showPage('policyPage')">&#8592; Back</button>
+            <button class="btn-ghost" style="margin-top:16px" onclick="showPage('dashboardPage'); loadDashboard()">&#8592; Back to Dashboard</button>
         </div>
     </div>
 
@@ -463,6 +538,7 @@
             <div id="claimsList"></div>
             <div class="action-row" style="margin-top:20px">
                 <button class="btn btn-outline" onclick="showPage('quotePage')">New Quote</button>
+                <button class="btn-ghost" onclick="showPage('dashboardPage'); loadDashboard()">&#8592; Dashboard</button>
             </div>
         </div>
     </div>
@@ -509,6 +585,8 @@
             document.getElementById('headerName3').textContent = greeting;
             document.getElementById('headerName4').textContent = greeting;
             document.getElementById('headerName5').textContent = greeting;
+            document.getElementById('headerName6').textContent = greeting;
+            document.getElementById('headerName7').textContent = greeting;
         }
 
         function showError(id, msg) {
@@ -604,7 +682,8 @@
 
                 token = loginData.token;
                 setName(loginData.name);
-                showPage('quotePage');
+                showPage('dashboardPage');
+                loadDashboard();
 
             } catch (err) {
                 showError('loginError', 'Could not reach the server');
@@ -778,14 +857,138 @@
                 document.getElementById('claimForm').reset();
                 setTimeout(function() {
                     document.getElementById('claimSuccess').style.display = 'none';
-                    showPage('myClaimsPage');
-                    loadMyClaims();
+                    showPage('dashboardPage');
+                    loadDashboard();
                 }, 1400);
 
             } catch (err) {
                 showError('claimError', 'Could not reach the server');
             }
         });
+
+        async function loadDashboard() {
+            var policiesEl = document.getElementById('dashPolicies');
+            var claimsEl = document.getElementById('dashClaims');
+            policiesEl.innerHTML = '<p style="color:#999;font-size:13px">Loading...</p>';
+            claimsEl.innerHTML = '<p style="color:#999;font-size:13px">Loading...</p>';
+
+            try {
+                var polRes = await fetch(API + '/api/policies', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var policies = await polRes.json();
+
+                if (!policies.length) {
+                    policiesEl.innerHTML = '<p style="color:#999;font-size:13px">No policies yet — get a quote to get started.</p>';
+                } else {
+                    var polHtml = '';
+                    policies.forEach(function(p) {
+                        var badge = p.status === 'Active' ? 'badge-active' : 'badge-pending';
+                        var encoded = encodeURIComponent(JSON.stringify(p));
+                        polHtml += '<div class="dash-card" style="cursor:pointer" onclick="viewPolicy(' + encoded + ')">' +
+                            '<div class="dash-card-main">' +
+                                '<div class="dash-card-title">' + p.destination + ' &nbsp;<span class="badge ' + badge + '">' + p.status + '</span></div>' +
+                                '<div class="dash-card-sub">' + fmtDate(p.startDate) + ' – ' + fmtDate(p.endDate) + ' · ' + fmtMoney(p.premiumPaid) + ' paid</div>' +
+                            '</div>' +
+                            '<span style="color:#ccc;font-size:18px">›</span>' +
+                            '</div>';
+                    });
+                    policiesEl.innerHTML = polHtml;
+                }
+            } catch (err) {
+                policiesEl.innerHTML = '<p style="color:#c62828;font-size:13px">Could not load policies.</p>';
+            }
+
+            try {
+                var claimRes = await fetch(API + '/api/claims', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var claims = await claimRes.json();
+
+                if (!claims.length) {
+                    claimsEl.innerHTML = '<p style="color:#999;font-size:13px">No claims yet.</p>';
+                } else {
+                    var claimHtml = '';
+                    claims.slice(0, 5).forEach(function(c) {
+                        var badge = (c.status === 'Approved' || c.status === 'Settled') ? 'badge-active' : 'badge-pending';
+                        claimHtml += '<div class="dash-card">' +
+                            '<div class="dash-card-main">' +
+                                '<div class="dash-card-title">' + c.claimType + ' &nbsp;<span class="badge ' + badge + '">' + c.status + '</span></div>' +
+                                '<div class="dash-card-sub">' + c.description + ' · ' + fmtMoney(c.amount) + '</div>' +
+                                '<div style="font-size:11px;color:#bbb;margin-top:2px">' + fmtDate(c.submittedAt) + '</div>' +
+                            '</div>' +
+                            '</div>';
+                    });
+                    if (claims.length > 5) {
+                        claimHtml += '<p style="font-size:13px;color:#999;margin-top:4px">+ ' + (claims.length - 5) + ' more</p>';
+                    }
+                    claimHtml += '<button class="link-btn" style="margin-top:6px" onclick="showPage(\'myClaimsPage\')">View all with documents →</button>';
+                    claimsEl.innerHTML = claimHtml;
+                }
+            } catch (err) {
+                claimsEl.innerHTML = '<p style="color:#c62828;font-size:13px">Could not load claims.</p>';
+            }
+        }
+
+        function startClaim(policyId) {
+            currentPolicyId = policyId;
+            document.getElementById('claimForm').reset();
+            document.getElementById('claimSuccess').style.display = 'none';
+            clearError('claimError');
+            showPage('claimPage');
+        }
+
+        async function viewPolicy(encoded) {
+            var p = JSON.parse(decodeURIComponent(encoded));
+
+            document.getElementById('policyDetailTitle').textContent = p.destination;
+            document.getElementById('policyDetailCard').innerHTML =
+                row('Policy ID', '<span style="font-size:11px;color:#999">' + p.policyId + '</span>') +
+                row('Status', '<span class="badge ' + (p.status === 'Active' ? 'badge-active' : 'badge-pending') + '">' + p.status + '</span>') +
+                row('Destination', p.destination) +
+                row('Departure', fmtDate(p.startDate)) +
+                row('Return', fmtDate(p.endDate)) +
+                row('Premium Paid', fmtMoney(p.premiumPaid));
+
+            var actions = document.getElementById('policyDetailActions');
+            if (p.status === 'Active') {
+                actions.innerHTML = '<button class="btn btn-primary" style="width:auto;margin-top:0" onclick="startClaim(\'' + p.policyId + '\')">Submit Claim</button>';
+            } else {
+                actions.innerHTML = '';
+            }
+
+            document.getElementById('policyDetailClaims').innerHTML = '<p style="color:#999;font-size:13px">Loading...</p>';
+            showPage('policyDetailPage');
+
+            try {
+                var res = await fetch(API + '/api/claims', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var allClaims = await res.json();
+                var claims = allClaims.filter(function(c) { return c.policyId === p.policyId; });
+
+                if (!claims.length) {
+                    document.getElementById('policyDetailClaims').innerHTML = '<p style="color:#999;font-size:13px">No claims on this policy yet.</p>';
+                    return;
+                }
+
+                var html = '';
+                claims.forEach(function(c) {
+                    var badge = (c.status === 'Approved' || c.status === 'Settled') ? 'badge-active' : 'badge-pending';
+                    html += '<div class="summary-card" style="margin-bottom:10px">' +
+                        row('Type', c.claimType) +
+                        row('Description', c.description) +
+                        row('Amount', fmtMoney(c.amount)) +
+                        row('Status', '<span class="badge ' + badge + '">' + c.status + '</span>') +
+                        row('Submitted', fmtDate(c.submittedAt)) +
+                        '</div>';
+                });
+                document.getElementById('policyDetailClaims').innerHTML = html;
+
+            } catch (err) {
+                document.getElementById('policyDetailClaims').innerHTML = '<p style="color:#c62828;font-size:13px">Could not load claims.</p>';
+            }
+        }
 
         async function loadMyClaims() {
             clearError('claimsError');

@@ -28,7 +28,7 @@ namespace Login.Services
             if (customer == null || !BCrypt.Net.BCrypt.Verify(request.Password, customer.Password))
                 throw new UnauthorizedAccessException("Invalid email or password.");
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             // NameIdentifier is how we get the customer id back out in the controllers
@@ -45,7 +45,7 @@ namespace Login.Services
                 signingCredentials: creds
             );
 
-            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+            string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
             return new LoginResponse
             {

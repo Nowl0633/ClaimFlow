@@ -1,5 +1,6 @@
 using ClaimFlow.Data;
 using ClaimFlow.Models;
+using ClaimFlow.Services;
 using Microsoft.EntityFrameworkCore;
 using Claims.DTOs;
 
@@ -8,10 +9,14 @@ namespace Claims.Services
     public class ClaimsService : IClaimsService
     {
         private readonly AppDbContext _db;
+        private readonly IEmailService? _email;
+        private readonly IAuditService? _audit;
 
-        public ClaimsService(AppDbContext db)
+        public ClaimsService(AppDbContext db, IEmailService? email = null, IAuditService? audit = null)
         {
             _db = db;
+            _email = email;
+            _audit = audit;
         }
 
         public async Task<ClaimResponse> SubmitAsync(Guid customerId, SubmitClaimRequest request)
@@ -40,6 +45,20 @@ namespace Claims.Services
 
             _db.Claims.Add(claim);
             await _db.SaveChangesAsync();
+
+            if (_audit != null)
+                await _audit.LogAsync("ClaimSubmitted", "Claim", claim.Id, customerId);
+
+            if (_email != null)
+            {
+                var customer = await _db.Customers.FindAsync(customerId);
+                if (customer != null)
+                    await _email.SendAsync(
+                        customer.Email,
+                        "Your claim has been received",
+                        $"Hi {customer.FirstName},\n\nWe've received your {claim.ClaimType} claim for {claim.Amount:C}. We'll be in touch once it's been reviewed.\n\nClaimFlow"
+                    );
+            }
 
             return ToDto(claim);
         }
@@ -72,6 +91,20 @@ namespace Claims.Services
 
             claim.Status = newStatus;
             await _db.SaveChangesAsync();
+
+            if (_audit != null)
+                await _audit.LogAsync($"Claim{newStatus}", "Claim", claim.Id, customerId);
+
+            if (_email != null)
+            {
+                var customer = await _db.Customers.FindAsync(customerId);
+                if (customer != null)
+                    await _email.SendAsync(
+                        customer.Email,
+                        $"Your claim has been {newStatus.ToLower()}",
+                        $"Hi {customer.FirstName},\n\nYour claim status has been updated to: {newStatus}.\n\nClaimFlow"
+                    );
+            }
 
             return ToDto(claim);
         }
